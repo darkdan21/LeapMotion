@@ -137,7 +137,7 @@ public class Application3D extends Thread {
 		// Setup display and context through LWJGL
 		try {
 		    PixelFormat pixelFormat = new PixelFormat(24, 0, 0, 0, 0);
-		    ContextAttribs contextAttributes = new ContextAttribs(3, 0).withForwardCompatible(true);
+		    ContextAttribs contextAttributes = new ContextAttribs(3, 1).withForwardCompatible(true);
 		    
 			Display.create( pixelFormat, contextAttributes );
 			Display.setTitle( windowTitle );

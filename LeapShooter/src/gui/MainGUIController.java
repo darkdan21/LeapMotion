@@ -31,7 +31,7 @@ public class MainGUIController implements Renderer3D{
 	            Vector position  = hand.palmPosition();
 	            	
 	            // FRUSTUM POSITIONING
-	            int distance_to_screen = 1280;
+	            int distance_to_screen = 1400;
 	            int screen_width  = 1280;
 	            int screen_height = 720;
 	            
@@ -47,7 +47,7 @@ public class MainGUIController implements Renderer3D{
 	            System.out.println( "positionX: "+position.getX() + " positionY: "+position.getY() );
 	            
 	            // Convert position to screen coordinates
-	            int DPI = 100;
+	            int DPI = 85;
 	            float mmToInches = 0.0393701f;
 	            
 	            

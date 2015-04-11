@@ -1,14 +1,24 @@
 package game;
 
 public class Card {	
-	public int value = 0;
+	public Long value;
 	
 	public static enum Suit {DIAMONDS, HEARTS, SPADES, CLUBS, NONE};
 	public Suit suit = Suit.NONE;
 	
-	public Card(int v, Suit s) {
+	public Card(Long v, Long s) {
 		this.value = v;
-		this.suit = s;
+		switch (s.intValue()) {
+			case 0: this.suit = Suit.DIAMONDS;
+					break;
+			case 1: this.suit = Suit.DIAMONDS;
+					break;
+			case 2: this.suit = Suit.DIAMONDS;
+					break;
+			case 3: this.suit = Suit.DIAMONDS;
+					break;
+			default: this.suit = Suit.NONE;
+		}
 	}
 
 	public Card(Card card) {

@@ -1,7 +1,5 @@
 package game;
 
-import game.Card.Suit;
-
 import java.util.ArrayList;
 
 public class Board {
@@ -10,10 +8,11 @@ public class Board {
 	private Card shotCards[][] = new Card[length][length];
 	
 	public Board(ArrayList<Card> cards) {
+		this.length = (int) Math.sqrt(cards.size());
 		int counter = 0;
 		for (Card c : cards) {
 			board[counter/length][counter%length] = c;
-			shotCards[counter/length][counter%length] = new Card(0, Card.Suit.NONE);
+			shotCards[counter/length][counter%length] = new Card(0L, -1L);
 			counter++;
 		}
 	}

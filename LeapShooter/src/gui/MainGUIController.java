@@ -6,6 +6,7 @@ import game.Card;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.leapmotion.leap.Finger;
@@ -14,9 +15,10 @@ import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
 import com.leapmotion.leap.Gesture.Type;
 
+import static org.lwjgl.opengl.GL11.*;
 import leap.Sample;
 
-public class MainGUIController implements Renderer3D{
+public class MainGUIController implements Renderer3D, GButtonListener{
 
 	// General
 	private Texture cards, crosshair, gJoker, Joker;
@@ -31,6 +33,13 @@ public class MainGUIController implements Renderer3D{
 	private ArrayList<Board> boards;
 	private int currentRound = 0;
 	private int fireX=-1, fireY=-1;
+	private int scoreValue = 0;
+	private float scoreValueScroll = 0.0f;
+	private boolean gameOver = false;
+	private int roundTimerMax = 15*60;
+	private int roundTimer    = roundTimerMax;
+	
+	private GButton submitButton;
 	
 	// Visuals
 	private float animationTween = 0.0f; // 0.0 to 1.0 if fadeIn = 1, 1.0 to 2.0 otherwise
@@ -39,6 +48,15 @@ public class MainGUIController implements Renderer3D{
 	public MainGUIController( ArrayList<Board> boards ) {
 		// TODO Auto-generated constructor stub
 		this.boards = boards;
+	}
+	
+	public static boolean isFist(Hand hand) {
+		int count = 0;
+		for (Finger finger : hand.fingers()) {
+			if (finger.isExtended())
+				count++;
+		}		
+		return count == 0;
 	}
 	
 	@Override
@@ -51,27 +69,39 @@ public class MainGUIController implements Renderer3D{
 		
 		gJoker = Application3D.getApp().getResources().loadTexture("res/sprites/gJoker.png", "gJoker");
 		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
+		
+		submitButton = new GButton(650, 500, 140, 60);
 	}
 
 	@Override
 	public void update() {
 		// Game logic
-		if ( boards.get(currentRound).isGameOver() ){
+		if ( gameOver ) {submitButton.update(); return; }
+		if ( boards.get(currentRound).isGameOver() || roundTimer <= 0 ){
 			fadeIn = 1;
 			System.out.println("WINNING");
+			// REMOVE BULLETHOLES
+			Application3D.getApp().destructAll( bullethole.class );
+			
 			if ( fadeIn == 1 && animationTween >= 2 ){
 				// move onto next round or end
 				if ( currentRound < boards.size()-1 ) {
 					
 					// NEW ROUND
 					currentRound ++;
+					roundTimer    = roundTimerMax;
 					fadeIn = 0;
 					animationTween = 0;
 					
 					
-					// REMOVE BULLETHOLES
-					Application3D.getApp().destructAll( bullethole.class );
+				} else {
+					gameOver = true;
+					currentRound = 0;
 				}
+			}
+		} else {
+			if ( animationTween >= 1 && draw) {
+				roundTimer --;
 			}
 		}
 		
@@ -83,27 +113,84 @@ public class MainGUIController implements Renderer3D{
 
 	@Override
 	public void render3D() {
-		
+		//Application3D.getApp().getRenderUtils().drawQuad(0, 0, -512, 512);
 	}
 
 	@Override
 	public void render2D() {
 		// render board
+		if ( gameOver ) {
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .setTextAlign(GLFont.FA_CENTER);
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .drawString(
+			    ChatColor.RED + "GAME OVER!",
+			    Display.getWidth()/2,
+			    Display.getHeight()/2 - 50, 
+			    FontSize.VERY_LARGE,
+			    1.0f
+			 );
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .drawString(
+			    ChatColor.YELLOW + "Your final score is: "+scoreValue,
+			    Display.getWidth()/2,
+			    Display.getHeight()/2 + 20, 
+			    FontSize.VERY_LARGE,
+			    1.0f
+			 );
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .setTextAlign(GLFont.FA_LEFT);
+			
+			// Draw button
+			
+			
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .drawString(
+			    ChatColor.GREEN + "Submit score",
+			    submitButton.getButtonX(),
+			    submitButton.getButtonY(), 
+			    FontSize.LARGE,
+			    submitButton.getHover()?0.5f:1.0f
+			 );
+			
+			return;
+		}
+		if ( !draw ) { 
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .setTextAlign(GLFont.FA_CENTER);
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .drawString(
+			    ChatColor.RED + "GAME PAUSED",
+			    Display.getWidth()/2,
+			    Display.getHeight()/2 - 50, 
+			    FontSize.VERY_LARGE,
+			    1.0f
+			 );
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .drawString(
+			    ChatColor.YELLOW + "Place open hand above leap motion detector",
+			    Display.getWidth()/2,
+			    Display.getHeight()/2 + 20, 
+			    FontSize.VERY_LARGE,
+			    1.0f
+			 );
+			Application3D.getApp()
+			 .getRenderUtils()
+			 .setTextAlign(GLFont.FA_LEFT);
+			return;
+		}
+	    
 		renderBoard();
-				
-		//tween += 0.12;
-		if ( !draw ) return;
-		Application3D.getApp()
-					 .getRenderUtils()
-					 .drawString(
-					    ChatColor.RED + "Testing" + ChatColor.GREEN + " things" + ChatColor.YELLOW + " out!",
-					    50,
-					    50, 
-					    FontSize.LARGE,
-					    1.0f
-					 );
 		
-		Application3D.getApp()
+		/*Application3D.getApp()
 					 .getRenderUtils()
 					 .drawString(
 					    (fired)?"fired!":"not fired!",
@@ -111,9 +198,9 @@ public class MainGUIController implements Renderer3D{
 					    75, 
 					    FontSize.LARGE,
 					    1.0f
-					 );
+					 );*/
 		
-		Application3D.getApp()
+		/*Application3D.getApp()
 		 .getRenderUtils()
 		 .drawString(
 		    String.format( "%20f", prevDist ),
@@ -121,16 +208,40 @@ public class MainGUIController implements Renderer3D{
 		    100, 
 		    FontSize.LARGE,
 		    1.0f
+		 );*/
+
+		scoreValueScroll += ((float)scoreValue - scoreValueScroll)*0.075f;
+		Application3D.getApp()
+		 .getRenderUtils()
+		 .drawString(
+		    ChatColor.WHITE+"Score: "+ChatColor.GREEN+(int)Math.ceil(scoreValueScroll),
+			50,
+		    50, 
+		    FontSize.LARGE,
+		    1.0f
 		 );
+		
+		// draw timer
+		Application3D.getApp()
+		 .getRenderUtils()
+		 .drawString(
+				 ChatColor.WHITE+"Timer: "+ChatColor.YELLOW+String.format("%.1f", (float)roundTimer/60.0f ),
+			50,
+		    100, 
+		    FontSize.MEDIUM,
+		    1.0f
+		 );
+		
+		
 	
 		// render crosshair
-		crosshair_rot += 0.05f;
+		crosshair_rot += 0.025f;
 		Application3D.getApp()
 					.getRenderUtils()
-					.drawSpriteExt(x, y, crosshair, 85, 85, 1, 1, new GColour(1, 1, 1, 1));
+					.drawSpriteRotateExt(x, y, crosshair, 89, 87, 0.70f, 0.70f, crosshair_rot, new GColour(1, 1, 1, 1));
 		Application3D.getApp()
 					.getRenderUtils()
-					.drawSpriteExt(x, y, crosshair, 85, 85, 0.5f, 0.5f, new GColour(1, 1, 1, 1));
+					.drawSpriteRotateExt(x, y, crosshair, 89, 87, 0.45f, 0.45f, -crosshair_rot, new GColour(1, 1, 1, 1));
 	}
 
 	@Override
@@ -149,9 +260,9 @@ public class MainGUIController implements Renderer3D{
 
 	            String handType  = hand.isLeft() ? "Left hand" : "Right hand";
 	            Vector direction = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).direction();
-	            Vector position  = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).tipPosition();
+	            Vector position  = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).stabilizedTipPosition();
 	            
-	            if( hand.grabStrength() < 1) { draw = true; }
+	            if( isFist(hand) ) { draw=false;  return; }else{ draw = true; }
 	            // FRUSTUM POSITIONING
 	            int distance_to_screen = 1280;
 	            int screen_width  = 1280;
@@ -210,9 +321,16 @@ public class MainGUIController implements Renderer3D{
 	            		( screen_height/2 )*( direction.getY() / (perspectiveAngleY/2.0f) )*-1;
 	            
 	            // Simple Interpolation
-	            x += (xDET - x)*0.35;
-	            y += (yDET - y)*0.35;
-	            
+	            float distance =  (float) Math.sqrt( (xDET - x)*(xDET - x)+(yDET - y)*(yDET - y) );
+	            //if ( distance < 32 ) {
+		            x += (xDET - x)*0.25;
+		            y += (yDET - y)*0.25;
+	            /*} else if ( distance < 400 ) {
+		            x += (xDET - x)*0.175;
+		            y += (yDET - y)*0.175;
+	            } else {
+		            x += (xDET - x)*0.35;
+		           */
 	            Finger thumb 	   = hand.fingers().fingerType( Finger.Type.TYPE_THUMB).get(0);
 	            boolean THUMB_DOWN = Math.toDegrees( thumb.direction().angleTo(direction)) < 35;
 	            System.out.println( "DIR: "+Math.toDegrees(thumb.direction().angleTo(direction)) );
@@ -298,37 +416,35 @@ public class MainGUIController implements Renderer3D{
 				int col   		= card.value.intValue()-1;
 				boolean shot 	= board.getCardShot( cx, cy );
 				
+				int drawX = xx, drawY = yy;
+				if ( fadeIn == 0 ) {
+					drawX = (int) (xx*animationTween);
+					drawY = (int) (yy*Math.pow(animationTween, 3.5));
+				} else if ( fadeIn == 1 ) {
+					drawX = (int) (Display.getWidth()-((Display.getWidth()-xx)*(1-(animationTween-1))));
+					drawY = (int) (yy*(2-animationTween));
+				}
+				
+				// Check for fire hover
+				if ( fireX >= xx && fireX <= xx+scaledCardWidth ) {
+					if ( fireY >= yy && fireY <= yy+scaledCardHeight ) {
+						if ( !shot ) {
+							scoreValue += board.shoot( cx, cy );
+							shot = true;
+						}
+					}
+				}
 				
 				
 				// Draw card
 				if ( row >= 0 && row < 4 ) { // NORMAL CARD
-					// Check for fire hover
-					if ( fireX >= xx && fireX <= xx+scaledCardWidth ) {
-						if ( fireY >= yy && fireY <= yy+scaledCardHeight ) {
-							if ( !shot ) {
-								board.shoot( cx, cy );
-								shot = true;
-							}
-						}
-					}
-					
-					
-					int drawX = xx, drawY = yy;
-					if ( fadeIn == 0 ) {
-						drawX = (int) (xx*animationTween);
-						drawY = (int) (yy*Math.pow(animationTween, 3.5));
-					} else if ( fadeIn == 1 ) {
-						drawX = (int) (Display.getWidth()-((Display.getWidth()-xx)*(1-(animationTween-1))));
-						drawY = (int) (yy*(2-animationTween));
-					}
-					
-					
+
 					Application3D.getApp().getRenderUtils().drawSpritePartExt(drawX, drawY, (cardWidth+1)*col, (cardHeight+1)*row, cardWidth, cardHeight, cards, 0, 0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, alpha*(shot?0.25f:1)));
 					
 				} else if ( row == 4 ) { // COLOURED JOKER
-					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, Joker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+					Application3D.getApp().getRenderUtils().drawSpriteExt(drawX, drawY, Joker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, alpha*(shot?0.25f:1)));
 				} else if ( row == 5 ) { // GRAY JOKE
-					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, gJoker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+					Application3D.getApp().getRenderUtils().drawSpriteExt(drawX, drawY, gJoker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, alpha*(shot?0.25f:1)));
 				}
 				
 				xx += scaledCardWidth + paddingX;
@@ -353,6 +469,38 @@ public class MainGUIController implements Renderer3D{
 			case SPADES:		return 1;
 		}
 		return -1;
+	}
+
+	@Override
+	public void onGButtonClick(GButton button) {
+		// TODO Auto-generated method stub
+		if ( button == submitButton ) {
+			/// Submit action here
+		}
+	}
+
+	@Override
+	public void onGButtonRClick(GButton button) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGButtonHover(GButton button) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGButtonDown(GButton button) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGButtonMouseEnter(GButton button) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

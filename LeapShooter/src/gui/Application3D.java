@@ -112,12 +112,12 @@ public class Application3D extends Thread {
 			this.initInstances();
 			
 			// Render instances
-			glClearColor( 0.6f, 0.7f, 1.0f, 1.0f );
+			glClearColor( 0.6f, 0.7f, 1.0f, 0.0f );
 			glClearDepth( 1.0f );
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			this.update();
-			glEnable(GL_DEPTH_TEST); // Enable depth testing for 3D
-			this.render3D();
+			//glEnable(GL_DEPTH_TEST); // Enable depth testing for 3D
+			//this.render3D();
 			glDisable(GL_DEPTH_TEST); // Disable when rendering in 2D
 			this.render2D();
 			
@@ -148,12 +148,12 @@ public class Application3D extends Thread {
 		}
 		
 		// Initialise screen properties:
-		glClearColor( 0.6f, 0.7f, 1.0f, 1.0f );
+		glClearColor( 0.6f, 0.7f, 1.0f, 0.0f );
 		glViewport( 0, 0, windowWidth, windowHeight );
 		glTexParameterf(GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, 8);
 		glEnable( GL_BLEND ); 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		Display.setResizable( true );
 
 		

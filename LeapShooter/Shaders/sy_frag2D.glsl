@@ -1,4 +1,4 @@
-#version 130 core
+#version 130
 
 uniform sampler2D texture_diffuse;
 uniform mat3 uvMatrix;

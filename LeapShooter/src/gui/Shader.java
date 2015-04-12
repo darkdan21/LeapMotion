@@ -80,6 +80,7 @@ public class Shader {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
             while ((line = reader.readLine()) != null) {
+            	line = line.replace( "\n", "");
                 shaderSource.append(line).append("\n");
             }
             reader.close();
@@ -90,7 +91,9 @@ public class Shader {
         }
          
         shaderID = glCreateShader(type);
+        System.out.println(glGetShaderInfoLog(shaderID, 65536));
         glShaderSource(shaderID, shaderSource);
+        System.out.println(glGetShaderInfoLog(shaderID, 65536));
         glCompileShader(shaderID);
          
         if ( glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE) {

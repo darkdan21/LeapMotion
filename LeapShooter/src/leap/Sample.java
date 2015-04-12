@@ -55,7 +55,7 @@ class SampleListener extends Listener {
             String handType = hand.isLeft() ? "Left hand" : "Right hand";
             /*System.out.println("  " + handType + ", id: " + hand.id()
                              + ", palm position: " + hand.palmPosition());*/
-
+            
             // Get the hand's normal vector and direction
             Vector normal = hand.palmNormal();
             Vector direction = hand.direction();

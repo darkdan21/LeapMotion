@@ -1,8 +1,12 @@
 package gui;
 
+import org.lwjgl.util.vector.Vector3f;
+
+import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
+import com.leapmotion.leap.Gesture.Type;
 
 import leap.Sample;
 
@@ -11,15 +15,20 @@ public class MainGUIController implements Renderer3D{
 	private Texture cards;
 	private float x=50.0f, y=50.0f;
 	private double tween = 1.0;
+	private boolean draw = true;
+	private boolean fired = false;
+	private float  prevDist = 9999;
 	
 	@Override
 	public void init() {
 		// Load tex
 		cards = Application3D.getApp().getResources().loadTexture("res/sprites/classic-playing-cards.png", "cards");
+		Application3D.getApp().getAudioUtils().loadSound("res/Weapon.wav", "Gunshot");
 	}
 
 	@Override
 	public void update() {
+		draw = false;
 		// Get information
 		Frame frame = Sample.getLastFrame();
 		
@@ -27,9 +36,10 @@ public class MainGUIController implements Renderer3D{
 			for(Hand hand : frame.hands()) {
 
 	            String handType  = hand.isLeft() ? "Left hand" : "Right hand";
-	            Vector direction = hand.direction();
-	            Vector position  = hand.palmPosition();
-	            	
+	            Vector direction = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).direction();
+	            Vector position  = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).tipPosition();
+	            
+	            if( hand.grabStrength() < 1) { draw = true; }
 	            // FRUSTUM POSITIONING
 	            int distance_to_screen = 1280;
 	            int screen_width  = 1280;
@@ -91,16 +101,34 @@ public class MainGUIController implements Renderer3D{
 	            x += (xDET - x)*0.35;
 	            y += (yDET - y)*0.35;
 	            
+	            Vector tipPosition = hand.fingers().fingerType( Finger.Type.TYPE_THUMB).get(0).tipPosition();
+	            float dist = tipPosition.distanceTo(position);
+	            
+	            if (  dist < prevDist-8 ){
+		            if( !fired ){
+		            	prevDist = dist;
+		            	fired = true;
+		            	Application3D.getApp().getAudioUtils().playSound( "Gunshot");
+		            }
+	            } else {
+	            	if ( dist > prevDist+8 ){
+	            		fired = false;
+	            		prevDist = dist;
+	            	}
+	            	
+	            }
+            
+	            
 	            
 	            // Limit to data from one hand to avoid misk errors
 	            break;
 			}
 		}
 		
-		if ( x < 0 ) { x = 0; }
+		/*if ( x < 0 ) { x = 0; }
 		if ( y < 0 ) { y = 0; }
 		if ( x > 1280) { x = 1280; }
-		if ( y > 720 ) { y = 720; }
+		if ( y > 720 ) { y = 720; }*/
 		
 		// Linear interpolation
 	}
@@ -113,7 +141,7 @@ public class MainGUIController implements Renderer3D{
 	@Override
 	public void render2D() {
 		//tween += 0.12;
-		
+		if ( !draw ) return;
 		Application3D.getApp()
 					 .getRenderUtils()
 					 .drawString(
@@ -123,6 +151,26 @@ public class MainGUIController implements Renderer3D{
 					    FontSize.LARGE,
 					    1.0f
 					 );
+		
+		Application3D.getApp()
+					 .getRenderUtils()
+					 .drawString(
+					    (fired)?"fired!":"not fired!",
+					    50,
+					    75, 
+					    FontSize.LARGE,
+					    1.0f
+					 );
+		
+		Application3D.getApp()
+		 .getRenderUtils()
+		 .drawString(
+		    String.format( "%20f", prevDist ),
+			50,
+		    100, 
+		    FontSize.LARGE,
+		    1.0f
+		 );
 		
 		Application3D.getApp()
 		 .getRenderUtils()

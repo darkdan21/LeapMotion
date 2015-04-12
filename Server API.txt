@@ -1,0 +1,4 @@
+http://ec2-52-10-80-90.us-west-2.compute.amazonaws.com/Functions/initialiseGame.php - use post request of 'GameID'.
+This returns a json file with the following:
+9,16,25,36,49 cards in each hand.
+GameID and UserID - each of which need to be sent to the server when communicating

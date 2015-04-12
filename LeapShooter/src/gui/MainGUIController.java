@@ -154,7 +154,7 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 			    ChatColor.GREEN + "Submit score",
 			    submitButton.getButtonX(),
 			    submitButton.getButtonY(), 
-			    FontSize.MEDIUM,
+			    FontSize.LARGE,
 			    submitButton.getHover()?0.5f:1.0f
 			 );
 			

@@ -19,7 +19,7 @@ import leap.Sample;
 public class MainGUIController implements Renderer3D{
 
 	// General
-	private Texture cards, crosshair;
+	private Texture cards, crosshair, gJoker, Joker;
 	private float x=50.0f, y=50.0f;
 	private double tween = 1.0;
 	private boolean draw = true;
@@ -42,6 +42,9 @@ public class MainGUIController implements Renderer3D{
 		// Load tex
 		cards = Application3D.getApp().getResources().loadTexture("res/sprites/classic-playing-cards.png", "cards");
 		Application3D.getApp().getAudioUtils().loadSound("res/Weapon.wav", "Gunshot");
+		
+		gJoker = Application3D.getApp().getResources().loadTexture("res/sprites/gJoker.png", "gJoker");
+		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
 		
 		crosshair = Application3D.getApp().getResources().loadTexture("res/sprites/crosshair.png", "crosshair" );
 		
@@ -261,11 +264,10 @@ public class MainGUIController implements Renderer3D{
 					}
 					
 					Application3D.getApp().getRenderUtils().drawSpritePartExt(xx, yy, (cardWidth+1)*col, (cardHeight+1)*row, cardWidth, cardHeight, cards, 0, 0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
-					
 				} else if ( row == 4 ) { // COLOURED JOKER
-					
-				} else if ( row == 5 ) { // GRAY JOKER
-					
+					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, Joker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+				} else if ( row == 5 ) { // GRAY JOKE
+					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, gJoker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
 				}
 				
 				xx += scaledCardWidth + paddingX;

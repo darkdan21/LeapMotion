@@ -24,9 +24,9 @@ public class GameClient{
 	private String gameName;
 	private String gameID;
 	
-	ArrayList<Board> boards;
+	public ArrayList<Board> boards;
 	
-	GameClient(String userName, String gameName) {
+	public GameClient(String userName, String gameName) {
 		this.username = userName;
 		this.gameName = gameName;
 	}

@@ -37,4 +37,16 @@ public class Board {
 		
 		return score;
 	}
+	
+	public int getBoardSize(){
+		return length;
+	}
+	
+	public Card getCard( int x, int y ) {
+		return board[x][y];
+	}
+	
+	public boolean getCardShot( int x, int y ){
+		return shotCards[x][y].equals( board[x][y] );
+	}
 }

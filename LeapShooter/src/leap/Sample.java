@@ -9,9 +9,12 @@ package leap;
 
 import gui.Application3D;
 import gui.MainGUIController;
+import gui.MainGameMenu;
 
 import java.io.IOException;
 import java.lang.Math;
+
+import network.GameClient;
 
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
@@ -166,16 +169,21 @@ class SampleListener extends Listener {
 
 public class Sample {
 	private static SampleListener listener;
+	private static GameClient gameClient = new GameClient("User", "Game");
 	
     public static void main(String[] args) {
     	// MESS
     	// TODO Auto-generated method stub
 		Application3D app = Application3D.getApp();
-
-		app.registerRenderInstance( new MainGUIController() );
+		
+		MainGameMenu menu = new MainGameMenu();
+		//app.registerRenderInstance( new MainGUIController() );
+		app.registerRenderInstance( menu );
+		
 		app.setWindowTitle( "Leap Shooter" );
 		
 		app.start();
+		
 		//////////////////
 
     	
@@ -200,5 +208,9 @@ public class Sample {
     
     public static Frame getLastFrame(){
     	return listener.lastFrame;
+    }
+    
+    public static GameClient getGameClient(){
+    	return gameClient;
     }
 }

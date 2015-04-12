@@ -74,6 +74,7 @@ public class GameClient{
 			JSONObject jsonObj = (JSONObject) parser.parse(packet);
 			JSONObject dataObj = (JSONObject) jsonObj.get("data");
 			JSONArray handsArr = (JSONArray) dataObj.get("hands");
+			int level = 1;
 			for (int i =0; i<handsArr.size(); i++) {
 				JSONObject hand = (JSONObject) handsArr.get(i);
 
@@ -87,7 +88,7 @@ public class GameClient{
 					Long value = (Long) cardObj.get("number");
 					cards.add(new Card(value,suit));
 				}
-				boards.add(new Board(cards));
+				boards.add(new Board(cards,level++));
 			}
 			
 		} catch(ParseException pe) {

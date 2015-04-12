@@ -7,9 +7,10 @@ public class Board {
 	private Card board[][] = new Card[length][length];
 	private Card shotCards[][] = new Card[length][length];
 	private int shootcount = 0;
+	private int multiplier = 1;
 	
-	public Board(ArrayList<Card> cards) {
-		
+	public Board(ArrayList<Card> cards, int multiplier) {
+		this.multiplier = multiplier;
 		this.length = (int) Math.sqrt(cards.size());
 		board= new Card[length][this.length];
 		shotCards = new Card[this.length][this.length];
@@ -21,11 +22,13 @@ public class Board {
 		}
 	}
 	
-	public void shoot(int x, int y) {
+	public long shoot(int x, int y) {
 		if ( !this.getCardShot(x, y)) {
 			this.shotCards[x][y] = board[x][y];
 			shootcount ++;
+			return multiplier * board[x][y].value;
 		}
+		return 0;
 	}
 	
 	public boolean isGameOver(){
@@ -39,7 +42,7 @@ public class Board {
 			for (int j=0; j<length; j++) {
 				Card card = shotCards[i][j];
 				if (card.suit != Card.Suit.NONE)
-					score += card.value;					
+					score += this.multiplier * card.value;					
 			}
 		}
 		

@@ -164,6 +164,7 @@ public class Application3D extends Thread {
 	// Load universal resources
 	private void loadUniversalResources(){
 		// This can be modified
+		Texture bulletholePaper = resources.loadTexture("res/sprites/bulletholePaper.png", "bulletholePaper");
 	}
 	
 /////////////////////////////////////////////////////////////////
@@ -417,6 +418,9 @@ public class Application3D extends Thread {
 	 * These will be used for generic popups / temporary rendering instances that are needed.
 	 * 
 	 */
+	public void createBulletHole( int x, int y ) {
+		bullethole bh = new bullethole(x, y);
+	}
 
 	
 	public synchronized void destructAll( Class<?> cType ){

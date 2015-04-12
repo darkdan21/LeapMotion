@@ -6,6 +6,7 @@ public class Board {
 	private int length = 0;
 	private Card board[][] = new Card[length][length];
 	private Card shotCards[][] = new Card[length][length];
+	private int shootcount = 0;
 	
 	public Board(ArrayList<Card> cards) {
 		
@@ -21,7 +22,14 @@ public class Board {
 	}
 	
 	public void shoot(int x, int y) {
-		this.shotCards[x][y] = board[x][y];
+		if ( !this.getCardShot(x, y)) {
+			this.shotCards[x][y] = board[x][y];
+			shootcount ++;
+		}
+	}
+	
+	public boolean isGameOver(){
+		return ( shootcount == length*length );
 	}
 	
 	public int getScore() {

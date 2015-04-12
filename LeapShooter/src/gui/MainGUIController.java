@@ -32,6 +32,10 @@ public class MainGUIController implements Renderer3D{
 	private int currentRound = 0;
 	private int fireX=-1, fireY=-1;
 	
+	// Visuals
+	private float animationTween = 0.0f; // 0.0 to 1.0 if fadeIn = 1, 1.0 to 2.0 otherwise
+	private int fadeIn = 0;
+	
 	public MainGUIController( ArrayList<Board> boards ) {
 		// TODO Auto-generated constructor stub
 		this.boards = boards;
@@ -43,16 +47,34 @@ public class MainGUIController implements Renderer3D{
 		cards = Application3D.getApp().getResources().loadTexture("res/sprites/classic-playing-cards.png", "cards");
 		Application3D.getApp().getAudioUtils().loadSound("res/Weapon.wav", "Gunshot");
 		
-		gJoker = Application3D.getApp().getResources().loadTexture("res/sprites/gJoker.png", "gJoker");
-		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
-		
 		crosshair = Application3D.getApp().getResources().loadTexture("res/sprites/crosshair.png", "crosshair" );
 		
+		gJoker = Application3D.getApp().getResources().loadTexture("res/sprites/gJoker.png", "gJoker");
+		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
 	}
 
 	@Override
 	public void update() {
 		// Game logic
+		if ( boards.get(currentRound).isGameOver() ){
+			fadeIn = 1;
+			System.out.println("WINNING");
+			if ( fadeIn == 1 && animationTween >= 2 ){
+				// move onto next round or end
+				if ( currentRound < boards.size()-1 ) {
+					
+					// NEW ROUND
+					currentRound ++;
+					fadeIn = 0;
+					animationTween = 0;
+					
+					
+					// REMOVE BULLETHOLES
+					Application3D.getApp().destructAll( bullethole.class );
+				}
+			}
+		}
+		
 		
 		// Update leap
 		updateLeap();
@@ -202,6 +224,7 @@ public class MainGUIController implements Renderer3D{
 		            	Application3D.getApp().getAudioUtils().playSound( "Gunshot");
 		            	fireX = (int) x;
 		            	fireY = (int) y;
+		            	Application3D.getApp().createBulletHole(fireX, fireY);
 		            }
 	            } else {
 	            	fired = false;
@@ -217,7 +240,7 @@ public class MainGUIController implements Renderer3D{
 	
 	
 	private void renderBoard(){
-		Board board = boards.get(currentRound+1);
+		Board board = boards.get(currentRound);
 		
 		// BOARD REGION ////////////
 		int cardWidth 	= 72;
@@ -241,6 +264,30 @@ public class MainGUIController implements Renderer3D{
 		xx = leftX;
 		yy = topY;
 		
+		if ( fadeIn == 0 ){
+			if ( animationTween < 1 ) {
+				animationTween += 0.010f;
+			}
+		} else if ( fadeIn == 1 ){
+			if ( animationTween>=1 && animationTween < 2 ) {
+				animationTween += 0.010f;
+			} else { 
+				animationTween = 0;
+			}
+			
+		}
+		
+		float alpha = 1.0f;
+		if ( animationTween < 0.65f ) {
+			alpha = 0.0f;
+		} else
+		if ( animationTween >= 0.65f && animationTween < 0.90f ) {
+			alpha = (animationTween-0.65f)/(0.90f-0.65f);
+		}else
+		if( animationTween > 1.75f ) {
+			alpha = (2-animationTween)/0.25f;
+		}
+		
 		for( int cy = 0; cy < board.getBoardSize(); cy ++ ) {
 			xx = leftX;
 			for( int cx = 0; cx < board.getBoardSize(); cx ++ ) {
@@ -250,6 +297,8 @@ public class MainGUIController implements Renderer3D{
 				int row   		= convertSuitToImageRow( card.suit );
 				int col   		= card.value.intValue()-1;
 				boolean shot 	= board.getCardShot( cx, cy );
+				
+				
 				
 				// Draw card
 				if ( row >= 0 && row < 4 ) { // NORMAL CARD
@@ -263,7 +312,19 @@ public class MainGUIController implements Renderer3D{
 						}
 					}
 					
-					Application3D.getApp().getRenderUtils().drawSpritePartExt(xx, yy, (cardWidth+1)*col, (cardHeight+1)*row, cardWidth, cardHeight, cards, 0, 0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+					
+					int drawX = xx, drawY = yy;
+					if ( fadeIn == 0 ) {
+						drawX = (int) (xx*animationTween);
+						drawY = (int) (yy*Math.pow(animationTween, 3.5));
+					} else if ( fadeIn == 1 ) {
+						drawX = (int) (Display.getWidth()-((Display.getWidth()-xx)*(1-(animationTween-1))));
+						drawY = (int) (yy*(2-animationTween));
+					}
+					
+					
+					Application3D.getApp().getRenderUtils().drawSpritePartExt(drawX, drawY, (cardWidth+1)*col, (cardHeight+1)*row, cardWidth, cardHeight, cards, 0, 0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, alpha*(shot?0.25f:1)));
+					
 				} else if ( row == 4 ) { // COLOURED JOKER
 					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, Joker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
 				} else if ( row == 5 ) { // GRAY JOKE

@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -21,8 +20,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class GameClient{
-	private String registerURL;
-	private String scoreURL;
 	private String username;
 	private String gameName;
 	private String gameID;
@@ -37,8 +34,6 @@ public class GameClient{
 	
 	public void registerUserAndGetBoard(String url) {
 
-		this.registerURL = url;
-		
 		RegisterPacket init = new RegisterPacket(this.username,this.gameName);
 		
 		String request = "data="+init.serialized();		
@@ -101,7 +96,6 @@ public class GameClient{
 	
 	// Recursive polling...wtf...well, it's a hackathon :-P
 	public String sendScore(int score, String url) {
-		this.scoreURL = url;
 		ScorePacket scorePacket = new ScorePacket(score, this.gameID, this.username);
 		String request = "data="+scorePacket.serialized();
 		System.out.println("Request: "+request);

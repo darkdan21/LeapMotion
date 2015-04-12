@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -129,6 +130,24 @@ public class RenderUtils {
        wm.setIdentity();
     }
     
+    public void drawQuadExt( float x, float y, float width, float height, float angle, float xt, float yt ){
+        Matrix4f wm = Application3D.getApp().getWorldMatrix();
+        
+        wm.setIdentity();
+        
+        wm.translate( new Vector2f( xt, yt) );
+        wm.rotate( angle, new Vector3f( 0, 0, 1));
+        wm.translate( new Vector2f( x, y) );
+        
+        wm.scale( new Vector3f( width, height, 1 ) );
+        
+        
+        Application3D.getApp().matrixWorldBind();
+        this.vboQuad.render();
+        wm.setIdentity();
+        Application3D.getApp().matrixWorldBind();
+     }
+    
     public void drawQuadPlain( float x, float y, float width, float height, GColour colour ){
         texPlain.bind();
         Application3D.getApp().getActiveShader().setUniformColour( colour );
@@ -176,7 +195,27 @@ public class RenderUtils {
     public void drawSpriteExt( float x, float y, Texture tex, float originX, float originY, float xscale, float yscale, GColour colour ){
         tex.bind();
         Application3D.getApp().getActiveShader().setUniformColour( colour );
+        
         drawQuad( x-originX*xscale, y-originY*yscale, tex.getWidth()*xscale, tex.getHeight()*yscale );
+    }
+    
+    /**
+     * Renders a 2D sprite to the screen given a few parameters
+     * @param x
+     * @param y
+     * @param tex
+     * @param originX
+     * @param originY
+     * @param xscale
+     * @param yscale
+     * @param colour
+     */
+    public void drawSpriteRotateExt( float x, float y, Texture tex, float originX, float originY, float xscale, float yscale, float angle, GColour colour ){
+        tex.bind();
+        Application3D.getApp().getActiveShader().setUniformColour( colour );
+
+        drawQuadExt( -originX*xscale, -originY*yscale, tex.getWidth()*xscale, tex.getHeight()*yscale, angle, x, y );
+
     }
     
     

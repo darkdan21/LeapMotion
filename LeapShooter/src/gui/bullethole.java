@@ -1,10 +1,14 @@
 package gui;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class bullethole extends FactoryInstance3D{
 
 	int x;
 	int y;
 	Texture bullethole;
+	boolean delete = false;
+	float alpha = 1;
 	
 	public bullethole( int x, int y ) {
 		super();
@@ -22,7 +26,12 @@ public class bullethole extends FactoryInstance3D{
 	@Override
 	public void update() {
 		// TODO Auto-generated method stub
-		
+		if ( delete ) {
+			alpha -= 0.05f;
+			if ( alpha <= 0 ) {
+				this.destruct();
+			}
+		}
 	}
 
 	@Override
@@ -34,7 +43,10 @@ public class bullethole extends FactoryInstance3D{
 	@Override
 	public void render2D() {
 		// TODO Auto-generated method stub
-		Application3D.getApp().getRenderUtils().drawSprite(x-21, y-23, bullethole, 1, 1, 1, 1);
+		//glBlendFunc(GL_ZERO, GL_DST_ALPHA);
+
+		Application3D.getApp().getRenderUtils().drawSprite(x-21, y-23, bullethole, 1, 1, 1, alpha);
+
 	}
 
 	@Override
@@ -46,7 +58,7 @@ public class bullethole extends FactoryInstance3D{
 	@Override
 	public void deleteBegin() {
 		// TODO Auto-generated method stub
-		
+		delete = true;
 	}
 
 }

@@ -106,7 +106,9 @@ public class GameClient{
 		System.out.println("Request: "+request);
 		String response = sendPOSTRequest(request, url);
 		System.out.println("Response: "+response);
+		
 		setScores(response);
+		
 		while (this.scores == null) {
 			System.out.println("Start polling");
 			try {
@@ -124,7 +126,7 @@ public class GameClient{
 	
 		
 	private void setScores(String packet) {
-		if (packet != "wait" && packet != "error") {
+		if (!packet.equals("wait") && !packet.equals("error")) {
 			JSONParser parser = new JSONParser();
 			ArrayList<Score> scores = new ArrayList<Score>();
 			

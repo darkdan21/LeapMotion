@@ -7,9 +7,9 @@ public class ScorePacket {
 	
 	public int score;
 	public String gameID;
-	public Long userID;
+	public String username;
 	
-	public ScorePacket(int score, String gID, Long pID) {
+	public ScorePacket(int score, String gID, String pID) {
 				
 		jsonString.put("GameID", gID);
 		jsonString.put("Score", score);
@@ -17,7 +17,7 @@ public class ScorePacket {
 		
 		this.score = score;
 		this.gameID = gID;
-		this.userID = pID;
+		this.username = pID;
 	}
 	
 	public String serialized() {

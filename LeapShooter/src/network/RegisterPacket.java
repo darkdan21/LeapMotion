@@ -11,7 +11,7 @@ public class RegisterPacket {
 	public RegisterPacket(String pID, String gID) {
 				
 		jsonString.put("GameID", gID);
-		jsonString.put("UserID", pID);
+		jsonString.put("Username", pID);
 		
 		this.playerID = pID;
 		this.gameID = gID;

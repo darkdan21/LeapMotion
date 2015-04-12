@@ -2,6 +2,8 @@ package network;
 
 import game.Board;
 import game.Card;
+import game.Score;
+import game.Scores;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,6 +28,7 @@ public class GameClient{
 	private String gameID;
 	
 	ArrayList<Board> boards;
+	public Scores scores;
 	
 	GameClient(String userName, String gameName) {
 		this.username = userName;
@@ -78,9 +82,9 @@ public class GameClient{
 				for (int j=0; j<cardsArr.size(); j++) {
 					
 					
-					JSONObject card = (JSONObject) cardsArr.get(j);
-					Long suit = (Long) card.get("suit");
-					Long value = (Long) card.get("number");
+					JSONObject cardObj = (JSONObject) cardsArr.get(j);
+					Long suit = (Long) cardObj.get("suit");
+					Long value = (Long) cardObj.get("number");
 					cards.add(new Card(value,suit));
 				}
 				boards.add(new Board(cards));
@@ -94,35 +98,52 @@ public class GameClient{
 		this.boards = boards;
 	}
 	
+	// Recursive polling...wtf...well, it's a hackathon :-P
 	public String sendScore(int score, String url) {
 		this.scoreURL = url;
 		ScorePacket scorePacket = new ScorePacket(score, this.gameID, this.username);
 		String request = "data="+scorePacket.serialized();
 		System.out.println("Request: "+request);
 		String response = sendPOSTRequest(request, url);
-		System.out.println("!Response: "+response);
-		if (response.equals(new String("wait"))) {
+		System.out.println("Response: "+response);
+		setScores(response);
+		while (this.scores == null) {
 			System.out.println("Start polling");
-			response = waitForResult(url);
-		}
-		return response;
-	}
-	
-	private String waitForResult(String url) {
-		String result = sendGETRequest(url);
-		System.out.println(result);
-		while (result.equals("error")) {
-			System.out.println("No results yet...");
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			result = sendGETRequest(url);
+			response = sendScore(score, url);
 		}
-		return result;
+		
+		setScores(response);
+		
+		return response;
 	}
 	
+		
+	private void setScores(String packet) {
+		if (packet != "wait" && packet != "error") {
+			JSONParser parser = new JSONParser();
+			ArrayList<Score> scores = new ArrayList<Score>();
+			
+			try {
+				JSONObject jsonObj = (JSONObject) parser.parse(packet);
+				JSONArray scoresArr = (JSONArray) jsonObj.get("Scores");
+				for (int i =0; i<scoresArr.size(); i++) {
+					JSONObject scoreObj = (JSONObject) scoresArr.get(i);
+					Score score = new Score((Long)scoreObj.get("score"), (String)scoreObj.get("UserID"));
+					scores.add(score);
+				}
+				this.scores = new Scores(scores);
+			} catch(ParseException pe) {
+		         System.out.println("position: " + pe.getPosition());
+		         System.out.println(pe);
+		    }
+		}
+	}
+
 	public static String sendGETRequest(String serverURL) {
 	      URL url;
 	      HttpURLConnection conn;

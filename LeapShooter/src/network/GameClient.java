@@ -20,8 +20,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class GameClient{
-	private String username;
-	private String gameName;
+	public String username;
+	public String gameName;
 	private String gameID;
 	
 	public ArrayList<Board> boards;

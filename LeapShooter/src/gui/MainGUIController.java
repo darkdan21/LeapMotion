@@ -5,6 +5,8 @@ import game.Card;
 
 import java.util.ArrayList;
 
+import network.GameClient;
+
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -36,8 +38,10 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 	private int scoreValue = 0;
 	private float scoreValueScroll = 0.0f;
 	private boolean gameOver = false;
-	private int roundTimerMax = 15*60;
+	private int roundTimerMax = 20*60;
 	private int roundTimer    = roundTimerMax;
+	
+	boolean showGameOver= false;
 	
 	private GButton submitButton;
 	
@@ -71,12 +75,13 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
 		
 		submitButton = new GButton(650, 500, 140, 60);
+		submitButton.addListener(this);
 	}
 
 	@Override
 	public void update() {
 		// Game logic
-		if ( gameOver ) {submitButton.update(); return; }
+		if ( gameOver && showGameOver ) {submitButton.update(); return; }
 		if ( boards.get(currentRound).isGameOver() || roundTimer <= 0 ){
 			fadeIn = 1;
 			System.out.println("WINNING");
@@ -97,6 +102,7 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 				} else {
 					gameOver = true;
 					currentRound = 0;
+					showGameOver = true; 
 				}
 			}
 		} else {
@@ -119,7 +125,7 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 	@Override
 	public void render2D() {
 		// render board
-		if ( gameOver ) {
+		if ( gameOver && showGameOver ) {
 			Application3D.getApp()
 			 .getRenderUtils()
 			 .setTextAlign(GLFont.FA_CENTER);
@@ -476,6 +482,10 @@ public class MainGUIController implements Renderer3D, GButtonListener{
 		// TODO Auto-generated method stub
 		if ( button == submitButton ) {
 			/// Submit action here
+			System.out.println("score submitted");
+			GameClient gc = Sample.getGameClient();
+			Application3D.getApp().registerRenderInstance( new GUIHighscores(gc.username, gc.gameName, scoreValue));
+			showGameOver = false;
 		}
 	}
 

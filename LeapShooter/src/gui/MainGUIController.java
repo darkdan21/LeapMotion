@@ -1,8 +1,13 @@
 package gui;
 
+
 import org.lwjgl.util.vector.Vector3f;
 
 import com.leapmotion.leap.Finger;
+
+import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.FingerList;
+
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
@@ -15,9 +20,21 @@ public class MainGUIController implements Renderer3D{
 	private Texture cards;
 	private float x=50.0f, y=50.0f;
 	private double tween = 1.0;
+
 	private boolean draw = true;
 	private boolean fired = false;
 	private float  prevDist = 9999;
+
+	
+	public static boolean isFist(Hand hand) {
+		int count = 0;
+		for (Finger finger : hand.fingers()) {
+			if (finger.isExtended())
+				count++;
+		}		
+		return count == 0;
+	}
+
 	
 	@Override
 	public void init() {
@@ -36,6 +53,7 @@ public class MainGUIController implements Renderer3D{
 			for(Hand hand : frame.hands()) {
 
 	            String handType  = hand.isLeft() ? "Left hand" : "Right hand";
+
 	            Vector direction = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).direction();
 	            Vector position  = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).tipPosition();
 	            
@@ -104,6 +122,7 @@ public class MainGUIController implements Renderer3D{
 	            Vector tipPosition = hand.fingers().fingerType( Finger.Type.TYPE_THUMB).get(0).tipPosition();
 	            float dist = tipPosition.distanceTo(position);
 	            
+	            // FIRE SHOT
 	            if (  dist < prevDist-8 ){
 		            if( !fired ){
 		            	prevDist = dist;
@@ -122,6 +141,7 @@ public class MainGUIController implements Renderer3D{
 	            
 	            // Limit to data from one hand to avoid misk errors
 	            break;
+
 			}
 		}
 		

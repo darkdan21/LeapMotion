@@ -79,11 +79,14 @@ public class Main {
 			JSONArray handsArr = (JSONArray) dataObj.get("hands");
 			for (int i =0; i<handsArr.size(); i++) {
 				JSONObject hand = (JSONObject) handsArr.get(i);
-				System.out.println(hand);
+
 				ArrayList<Card> cards = new ArrayList<Card>();
 				JSONArray cardsArr =  (JSONArray) hand.get("cards");
 				for (int j=0; j<cardsArr.size(); j++) {
+					
+					
 					JSONObject card = (JSONObject) cardsArr.get(j);
+					System.out.println(i+", "+j+": "+card);
 					Long suit = (Long) card.get("suit");
 					Long value = (Long) card.get("number");
 					cards.add(new Card(value,suit));
@@ -100,20 +103,16 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		InitialPacket init = new InitialPacket("game1", "patrick");
-//		JSONObject gameObj = new JSONObject();
-//		
-//		gameObj.put("GameID", "game1");
-//		gameObj.put("UserID", "patrick");
-//		
+		InitialPacket init = new InitialPacket("game2", "patrick2");
+		
 		String request = "data="+init.serialized();
 		String response = executePost("http://ec2-52-10-80-90.us-west-2.compute.amazonaws.com/Functions/initialiseGame.php", request);
 		//System.out.println(init.serialized());
-		System.out.println(response);
-		ArrayList<Board> boards = parseJSONBoardPacket(response);
-		
-		System.out.print(boards);
-
+		//System.out.println(response);
+		if (response != null) {
+			ArrayList<Board> boards = parseJSONBoardPacket(response);
+			System.out.print(boards);
+		}
 	}
 
 }

@@ -8,7 +8,10 @@ public class Board {
 	private Card shotCards[][] = new Card[length][length];
 	
 	public Board(ArrayList<Card> cards) {
+		
 		this.length = (int) Math.sqrt(cards.size());
+		board= new Card[length][this.length];
+		shotCards = new Card[this.length][this.length];
 		int counter = 0;
 		for (Card c : cards) {
 			board[counter/length][counter%length] = c;

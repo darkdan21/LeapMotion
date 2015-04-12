@@ -81,6 +81,7 @@ public class Shader {
             String line;
             while ((line = reader.readLine()) != null) {
             	line = line.replace( "\n", "");
+            	line = line.replace( "\r", "");
                 shaderSource.append(line).append("\n");
             }
             reader.close();
@@ -94,7 +95,9 @@ public class Shader {
         System.out.println(glGetShaderInfoLog(shaderID, 65536));
         glShaderSource(shaderID, shaderSource);
         System.out.println(glGetShaderInfoLog(shaderID, 65536));
+        System.out.println("1: "+glGetShaderInfoLog(shaderID, 65536));
         glCompileShader(shaderID);
+        System.out.println("2: "+glGetShaderInfoLog(shaderID, 65536));
          
         if ( glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Could not compile shader."+filename);

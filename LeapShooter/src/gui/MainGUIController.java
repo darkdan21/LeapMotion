@@ -1,5 +1,6 @@
 package gui;
 
+import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.FingerList;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
@@ -14,13 +15,11 @@ public class MainGUIController implements Renderer3D{
 	private double tween = 1.0;
 	
 	public static boolean isFist(Hand hand) {
-		FingerList fingers = hand.fingers();
 		int count = 0;
-		for (int i=0; i<fingers.count(); i++) {
-			if (fingers.get(i).isExtended())
+		for (Finger finger : hand.fingers()) {
+			if (finger.isExtended())
 				count++;
-		}
-		
+		}		
 		return count == 0;
 	}
 	
@@ -57,7 +56,7 @@ public class MainGUIController implements Renderer3D{
 		            xBasis = screen_width / 2;
 		            yBasis = screen_height / 2;
 		            
-		            System.out.println( "positionX: "+position.getX() + " positionY: "+position.getY() );
+//		            System.out.println( "positionX: "+position.getX() + " positionY: "+position.getY() );
 		            
 		            // Convert position to screen coordinates
 		            int DPI = 85;
@@ -83,7 +82,7 @@ public class MainGUIController implements Renderer3D{
 		            horizontalNearFarScaleFactorX = 6.5f / (screen_width/DPI);
 		            verticalNearFarScaleFactorY   = 3.5f  / (screen_height/DPI);
 		            
-		            System.out.println("zpos: " + position.getZ());
+//		            System.out.println("zpos: " + position.getZ());
 		            
 		            // Adjust distance_to_screen
 		            distance_to_screen += position.getZ()*mmToInches*DPI;

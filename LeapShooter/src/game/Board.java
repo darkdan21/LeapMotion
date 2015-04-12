@@ -26,27 +26,62 @@ public class Board {
 		if ( !this.getCardShot(x, y)) {
 			this.shotCards[x][y] = board[x][y];
 			shootcount ++;
-			return multiplier * board[x][y].value;
+			int value = multiplier;
+			switch(board[x][y].value.intValue())
+			{
+				case 0:
+					value *= 10;
+					break;
+				case 1:
+					value *= 5;
+					break;
+				case 2:
+					value *= -2;
+					break;
+				case 3:
+					value *= -1;
+					break;
+				case 4:
+					value *= 0;
+					break;
+				case 5:
+					value *= 0;
+					break;
+				case 6:
+					value *= 1;
+					break;
+				case 7:
+					value *= 1;
+					break;
+				case 8:
+					value *= 1;
+					break;
+				case 9:
+					value *= 1;
+					break;
+				case 10:
+					value *= 1;
+					break;
+				case 11:
+					value *= 2;
+					break;
+				case 12:
+					value *= 2;
+					break;
+				case 13:
+					value *= 4;
+					break;
+				default:
+					value *= 0;
+					break;
+			}
+			return value;
 		}
 		return 0;
 	}
 	
 	public boolean isGameOver(){
 		return ( shootcount == length*length );
-	}
-	
-	public int getScore() {
-		int score = 0;
-		
-		for (int i=0; i<length; i++) {
-			for (int j=0; j<length; j++) {
-				Card card = shotCards[i][j];
-				if (card.suit != Card.Suit.NONE)
-					score += this.multiplier * card.value;					
-			}
-		}
-		
-		return score;
 	}
 	
 	public int getBoardSize(){

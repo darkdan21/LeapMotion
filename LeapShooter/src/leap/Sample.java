@@ -14,6 +14,9 @@ import gui.MainGameMenu;
 import java.io.IOException;
 import java.lang.Math;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import network.GameClient;
 
 import com.leapmotion.leap.*;
@@ -169,11 +172,26 @@ class SampleListener extends Listener {
 
 public class Sample {
 	private static SampleListener listener;
-	private static GameClient gameClient = new GameClient("User", "Game");
+	private static GameClient gameClient;
 	
     public static void main(String[] args) {
     	// MESS
-    	// TODO Auto-generated method stub
+    	
+    	JFrame frame = new JFrame("Enter username");
+    	String username = (String)JOptionPane.showInputDialog(frame,"Enter your username:");
+    	if(username == null)
+    	{
+    		username = "";
+    	}
+    	
+    	String game = null;
+    	while(game == null)
+    	{
+    		game = (String)JOptionPane.showInputDialog(frame,"Enter the game name:");
+    	}
+    	
+    	gameClient = new GameClient(username, game);
+    	
 		Application3D app = Application3D.getApp();
 		
 		MainGameMenu menu = new MainGameMenu();

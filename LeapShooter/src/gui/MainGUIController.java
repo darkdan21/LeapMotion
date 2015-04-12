@@ -1,17 +1,9 @@
 package gui;
 
-
-import org.lwjgl.util.vector.Vector3f;
-
 import com.leapmotion.leap.Finger;
-
-import com.leapmotion.leap.Finger;
-import com.leapmotion.leap.FingerList;
-
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
-import com.leapmotion.leap.Gesture.Type;
 
 import leap.Sample;
 

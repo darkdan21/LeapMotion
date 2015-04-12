@@ -1,42 +1,123 @@
 package gui;
 
+import game.Board;
+import game.Card;
+
+import java.util.ArrayList;
+
+import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
+
 import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
+import com.leapmotion.leap.Gesture.Type;
 
 import leap.Sample;
 
 public class MainGUIController implements Renderer3D{
 
-	private Texture cards;
+	// General
+	private Texture cards, crosshair, gJoker, Joker;
 	private float x=50.0f, y=50.0f;
 	private double tween = 1.0;
-
 	private boolean draw = true;
 	private boolean fired = false;
 	private float  prevDist = 9999;
-
+	private float crosshair_rot = 0.0f;
 	
-	public static boolean isFist(Hand hand) {
-		int count = 0;
-		for (Finger finger : hand.fingers()) {
-			if (finger.isExtended())
-				count++;
-		}		
-		return count == 0;
+	// Game logic
+	private ArrayList<Board> boards;
+	private int currentRound = 0;
+	private int fireX=-1, fireY=-1;
+	
+	public MainGUIController( ArrayList<Board> boards ) {
+		// TODO Auto-generated constructor stub
+		this.boards = boards;
 	}
-
 	
 	@Override
 	public void init() {
 		// Load tex
 		cards = Application3D.getApp().getResources().loadTexture("res/sprites/classic-playing-cards.png", "cards");
 		Application3D.getApp().getAudioUtils().loadSound("res/Weapon.wav", "Gunshot");
+		
+		gJoker = Application3D.getApp().getResources().loadTexture("res/sprites/gJoker.png", "gJoker");
+		Joker = Application3D.getApp().getResources().loadTexture("res/sprites/Joker.png", "Joker");
+		
+		crosshair = Application3D.getApp().getResources().loadTexture("res/sprites/crosshair.png", "crosshair" );
+		
 	}
 
 	@Override
 	public void update() {
+		// Game logic
+		
+		// Update leap
+		updateLeap();
+		
+	}
+
+	@Override
+	public void render3D() {
+		
+	}
+
+	@Override
+	public void render2D() {
+		// render board
+		renderBoard();
+				
+		//tween += 0.12;
+		if ( !draw ) return;
+		Application3D.getApp()
+					 .getRenderUtils()
+					 .drawString(
+					    ChatColor.RED + "Testing" + ChatColor.GREEN + " things" + ChatColor.YELLOW + " out!",
+					    50,
+					    50, 
+					    FontSize.LARGE,
+					    1.0f
+					 );
+		
+		Application3D.getApp()
+					 .getRenderUtils()
+					 .drawString(
+					    (fired)?"fired!":"not fired!",
+					    50,
+					    75, 
+					    FontSize.LARGE,
+					    1.0f
+					 );
+		
+		Application3D.getApp()
+		 .getRenderUtils()
+		 .drawString(
+		    String.format( "%20f", prevDist ),
+			50,
+		    100, 
+		    FontSize.LARGE,
+		    1.0f
+		 );
+	
+		// render crosshair
+		crosshair_rot += 0.05f;
+		Application3D.getApp()
+					.getRenderUtils()
+					.drawSpriteExt(x, y, crosshair, 85, 85, 1, 1, new GColour(1, 1, 1, 1));
+		Application3D.getApp()
+					.getRenderUtils()
+					.drawSpriteExt(x, y, crosshair, 85, 85, 0.5f, 0.5f, new GColour(1, 1, 1, 1));
+	}
+
+	@Override
+	public void destroy() {
+		
+	}
+	
+	
+	private void updateLeap(){
 		draw = false;
 		// Get information
 		Frame frame = Sample.getLastFrame();
@@ -45,7 +126,6 @@ public class MainGUIController implements Renderer3D{
 			for(Hand hand : frame.hands()) {
 
 	            String handType  = hand.isLeft() ? "Left hand" : "Right hand";
-
 	            Vector direction = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).direction();
 	            Vector position  = hand.fingers().fingerType( Finger.Type.TYPE_INDEX).get(0).tipPosition();
 	            
@@ -111,87 +191,107 @@ public class MainGUIController implements Renderer3D{
 	            x += (xDET - x)*0.35;
 	            y += (yDET - y)*0.35;
 	            
-	            Vector tipPosition = hand.fingers().fingerType( Finger.Type.TYPE_THUMB).get(0).tipPosition();
-	            float dist = tipPosition.distanceTo(position);
+	            Finger thumb 	   = hand.fingers().fingerType( Finger.Type.TYPE_THUMB).get(0);
+	            boolean THUMB_DOWN = Math.toDegrees( thumb.direction().angleTo(direction)) < 35;
+	            System.out.println( "DIR: "+Math.toDegrees(thumb.direction().angleTo(direction)) );
+	            System.out.println(THUMB_DOWN);
 	            
-	            // FIRE SHOT
-	            if (  dist < prevDist-8 ){
+	            if (  THUMB_DOWN ){
 		            if( !fired ){
-		            	prevDist = dist;
 		            	fired = true;
 		            	Application3D.getApp().getAudioUtils().playSound( "Gunshot");
+		            	fireX = (int) x;
+		            	fireY = (int) y;
 		            }
 	            } else {
-	            	if ( dist > prevDist+8 ){
-	            		fired = false;
-	            		prevDist = dist;
-	            	}
-	            	
+	            	fired = false;
 	            }
             
 	            
 	            
 	            // Limit to data from one hand to avoid misk errors
 	            break;
-
 			}
 		}
-		
-		/*if ( x < 0 ) { x = 0; }
-		if ( y < 0 ) { y = 0; }
-		if ( x > 1280) { x = 1280; }
-		if ( y > 720 ) { y = 720; }*/
-		
-		// Linear interpolation
 	}
-
-	@Override
-	public void render3D() {
+	
+	
+	private void renderBoard(){
+		Board board = boards.get(currentRound+1);
 		
+		// BOARD REGION ////////////
+		int cardWidth 	= 72;
+		int cardHeight 	= 97;
+		int paddingX	= 16;
+		int paddingY	= 16;
+		int maxHeight 	= (int)Display.getHeight()-100;
+		int maxWidth 	= (int)((float)maxHeight*((float)cardWidth/(float)cardHeight))+(paddingX*board.getBoardSize());
+		int leftX		= (Display.getWidth()-maxWidth)/2;
+		int topY		= (Display.getHeight()-maxHeight)/2;
+		int scaledCardHeight = (maxHeight-(paddingY*board.getBoardSize()))/board.getBoardSize();
+		int scaledCardWidth  = (int) (scaledCardHeight*((float)cardWidth/(float)cardHeight)); // ensures aspect ratio is maintained
+		
+		
+		System.out.println("Area dimensions: "+maxWidth+" "+maxHeight);
+		System.out.println("Card size: "+scaledCardWidth+" "+scaledCardHeight);
+		////////////////////////////
+		
+		// Drawing
+		int xx, yy;
+		xx = leftX;
+		yy = topY;
+		
+		for( int cy = 0; cy < board.getBoardSize(); cy ++ ) {
+			xx = leftX;
+			for( int cx = 0; cx < board.getBoardSize(); cx ++ ) {
+				
+				// Get card info
+				Card card 		= board.getCard( cx, cy );
+				int row   		= convertSuitToImageRow( card.suit );
+				int col   		= card.value.intValue()-1;
+				boolean shot 	= board.getCardShot( cx, cy );
+				
+				// Draw card
+				if ( row >= 0 && row < 4 ) { // NORMAL CARD
+					// Check for fire hover
+					if ( fireX >= xx && fireX <= xx+scaledCardWidth ) {
+						if ( fireY >= yy && fireY <= yy+scaledCardHeight ) {
+							if ( !shot ) {
+								board.shoot( cx, cy );
+								shot = true;
+							}
+						}
+					}
+					
+					Application3D.getApp().getRenderUtils().drawSpritePartExt(xx, yy, (cardWidth+1)*col, (cardHeight+1)*row, cardWidth, cardHeight, cards, 0, 0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+				} else if ( row == 4 ) { // COLOURED JOKER
+					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, Joker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+				} else if ( row == 5 ) { // GRAY JOKE
+					Application3D.getApp().getRenderUtils().drawSpriteExt(xx, yy, gJoker, 0,0, (float)scaledCardWidth/(float)cardWidth, (float)scaledCardHeight/(float)cardHeight, new GColour(1, 1, 1, shot?0.25f:1));
+				}
+				
+				xx += scaledCardWidth + paddingX;
+			}
+			yy += scaledCardHeight + paddingY;
+		}
+		
+		// reset fire:
+		fireX = -1;
+        fireY = -1;
 	}
-
-	@Override
-	public void render2D() {
-		//tween += 0.12;
-		if ( !draw ) return;
-		Application3D.getApp()
-					 .getRenderUtils()
-					 .drawString(
-					    ChatColor.RED + "Testing" + ChatColor.GREEN + " things" + ChatColor.YELLOW + " out!",
-					    50,
-					    50, 
-					    FontSize.LARGE,
-					    1.0f
-					 );
+	
+	private int convertSuitToImageRow( Card.Suit suit ){
 		
-		Application3D.getApp()
-					 .getRenderUtils()
-					 .drawString(
-					    (fired)?"fired!":"not fired!",
-					    50,
-					    75, 
-					    FontSize.LARGE,
-					    1.0f
-					 );
-		
-		Application3D.getApp()
-		 .getRenderUtils()
-		 .drawString(
-		    String.format( "%20f", prevDist ),
-			50,
-		    100, 
-		    FontSize.LARGE,
-		    1.0f
-		 );
-		
-		Application3D.getApp()
-		 .getRenderUtils()
-		 .drawSpritePartExt(x, y, 0, 0, 72, 98, cards, 36, 49, (float)Math.cos(tween), 1, new GColour(1, 1, 1, 1));
-	}
-
-	@Override
-	public void destroy() {
-		
+		switch( suit ) {
+			case CLUBS: 		return 0;
+			case DIAMONDS:		return 3;
+			case HEARTS:		return 2;
+			case JOKER_COLORED:	return 4;
+			case JOKER_GREY:	return 5;
+			case NONE:			return -1;
+			case SPADES:		return 1;
+		}
+		return -1;
 	}
 
 }

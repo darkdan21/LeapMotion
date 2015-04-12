@@ -192,6 +192,7 @@ public class Application3D extends Thread {
 	    this.setActiveShader( shader2D );
 		{
 			camera.setProjection2D(shader2D);
+			shader2D.resetUniformUVBias();
 			shader2D.setUniformColour( 1, 1, 1, 1 );
 			if( this.activeRoom != null ) {
 				this.activeRoom.render2D();
